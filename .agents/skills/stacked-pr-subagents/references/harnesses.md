@@ -38,15 +38,17 @@ To find out which harness you are in, look at your own tools: `task` with `agent
 - **Headless.** `claude -p --output-format json` returns the `session_id`; `claude -p "<message>" --resume <session id>` continues it.
 - Sources: [Subagents](https://code.claude.com/docs/en/sub-agents) (Resume subagents, Turn fork mode off), [Prompt caching](https://code.claude.com/docs/en/prompt-caching) (Which TTL each request gets), [Worktrees](https://code.claude.com/docs/en/worktrees) (Choose the base branch), [CHANGELOG](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) 2.1.304.
 
-## OpenCode
+## OpenCode 2
 
-- **Spawn.** The `subagent` tool, with an agent whose `mode` is `subagent` or `all`, defined in `.opencode/agents/<name>.md`, `~/.config/opencode/agents/<name>.md` or `opencode.jsonc`. In 2.2.7 a call blocks until the child finishes unless you pass `background: true`; blocking suits this workflow. The default nesting depth is 1, so layer agents can't start their own reviewers. The orchestrator starts reviewers.
+These notes are for OpenCode 2 and don't cover OpenCode 1, where the tool and its permission action were called `task`. V2 renamed both to `subagent` and uses ordered `permissions` rules instead of V1's `permission` map.
+
+- **Spawn.** The `subagent` tool, with an agent whose `mode` is `subagent` or `all`, defined in `.opencode/agents/<name>.md`, `~/.config/opencode/agents/<name>.md` or under `agents` in `opencode.jsonc`. Give the layer agent V2 `permissions` rules that allow `edit` and `shell`, and allow the orchestrator to launch it with `{ "action": "subagent", "resource": "<agent>", "effect": "allow" }`. In 2.2.7 a call blocks until the child finishes unless you pass `background: true`; blocking suits this workflow. On the `dev` branch after 2.2.7, every call runs in the background and reports back when the child goes idle ([#63382](https://github.com/anomalyco/opencode/pull/63382)). The default nesting depth is 1, so layer agents can't start their own reviewers. The orchestrator starts reviewers.
 - **Record** the child `sessionID` from the `<subagent sessionID="ses_…">` result, plus the orchestrator's own session id.
 - **Resume** by calling `subagent` again with the same `agent`, that `sessionID` and a new `prompt`. A finished child starts a new run on top of its history. Only the parent session may continue its children. Keep the same agent and model, because a switch costs the cache. Leaving out `sessionID` silently starts a new child ([#62793](https://github.com/anomalyco/opencode/issues/62793)). Some models send the literal string `ses` as the id and fail with "Subagent session not found: ses" ([#59293](https://github.com/anomalyco/opencode/issues/59293)); none of the reported models are Claude or GPT.
 - **After a restart**, reopen the same parent session (`opencode run --session <parent id>` or `/sessions` in the TUI), then continue the child by `sessionID`.
 - **Isolation.** A child works in its parent's directory. Start the orchestrator in the stack's worktree.
 - **Cache.** OpenCode sends no cache lifetime by default, so Anthropic's 5 minutes applies. Set `settings.cache.ttl` (for example `"1h"`) on the provider or model. Warming never applies to subagent sessions.
-- Sources: [Tools: Subagent](https://opencode.ai/docs/tools/), [Models: Cache lifetime](https://opencode.ai/docs/models/), [Warming](https://opencode.ai/docs/warming/), [PR #43172](https://github.com/anomalyco/opencode/pull/43172).
+- Sources: [Tools: Subagent](https://opencode.ai/docs/tools/), [Agents](https://opencode.ai/docs/agents/), [Migrate from V1](https://opencode.ai/docs/migrate-v1/), [Models: Cache lifetime](https://opencode.ai/docs/models/), [Warming](https://opencode.ai/docs/warming/), [PR #43172](https://github.com/anomalyco/opencode/pull/43172).
 
 ## Codex CLI
 

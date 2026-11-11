@@ -146,7 +146,7 @@ The strategy depends on two harness features: starting a subagent with a fresh c
 | Owner id | agent id             | `agentId`     | child `sessionID`           | `/root/<task_name>`                     |
 | Resume   | `write agent://<id>` | `SendMessage` | `subagent` with `sessionID` | `followup_task`                         |
 
-The details, settings and known bugs for each are in [references/harnesses.md](.agents/skills/stacked-pr-subagents/references/harnesses.md), checked on 2026-11-11 against Claude Code 2.1.322, OpenCode 2.2.7, Codex CLI 0.167.1 and the omp docs.
+The details, settings and known bugs for each are in [references/harnesses.md](.agents/skills/stacked-pr-subagents/references/harnesses.md), checked on 2026-11-11 against Claude Code 2.1.322, OpenCode 2.2.7 (OpenCode 1 isn't covered), Codex CLI 0.167.1 and the omp docs.
 
 ## Install
 
