@@ -7,7 +7,7 @@ description: Implement a multi-task plan as a stack of pull requests built by se
 
 The main session is the orchestrator. It splits the plan into layers and hands one layer at a time to a fresh subagent. That subagent implements the layer on its own branch, stacked on the previous layer's branch, and opens a pull request with `gh stack`. The orchestrator records which subagent owns which PR, so any later change to a layer goes back to the subagent that wrote it, which still holds its context. When the last layer is done and reviewed, the whole stack merges in one operation.
 
-This keeps every context small. A single session that implements a whole plan re-reads its entire, growing context on every turn. Parallel subagents in separate worktrees stay small, but dependent tasks conflict and their PRs must be rebased onto each other. Serial layers avoid both: each branch starts from the one below, so there is nothing to rebase between siblings.
+This keeps every context small. A single session that implements a whole plan re-reads its entire, growing context on every turn. Parallel subagents in separate worktrees stay small, but each starts from the trunk without the work it depends on, so their branches conflict, and an agent spends tokens resolving those conflicts when the branches come together. Serial layers avoid both: each branch starts from the one below, so there is nothing to reconcile between siblings.
 
 Use it for a plan with several dependent tasks that each need real implementation work. Don't use it for a change one session finishes comfortably, for independent tasks on disjoint files (parallel worktrees with separate PRs fit those), or for work where most steps wait on the user's decisions.
 

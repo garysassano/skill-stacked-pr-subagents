@@ -9,7 +9,7 @@ The skill itself is [`.agents/skills/stacked-pr-subagents/SKILL.md`](.agents/ski
 There are two common ways to have a coding agent implement a plan of many tasks, and both waste something.
 
 - **One session does everything.** Every turn re-sends the whole conversation, so each turn costs more than the last. A plan of a dozen tasks can push a session to hundreds of thousands of tokens of context, and the quality of its work drops as that context fills.
-- **Parallel subagents in separate worktrees.** Each context stays small, but tasks in a plan usually depend on each other. Parallel branches then conflict, every PR has to be rebased onto the others, and each PR waits on its own CI run before the next one can build on it.
+- **Parallel subagents in separate worktrees.** Each context stays small, but tasks in a plan usually depend on each other. Each subagent starts from `main` and can't see the work it depends on, so the branches overlap. Nothing forces you to wait for CI between them, but the work still has to come together: an agent resolves every conflict as the branches merge, spending tokens on code it didn't write, and a resolution can break what neither subagent tested.
 
 ## The strategy
 
@@ -34,8 +34,9 @@ flowchart LR
         m1(("main")) --> p1["PR 1"]
         m1 --> p2["PR 2"]
         m1 --> p3["PR 3"]
-        p2 -. "rebase onto PR 1" .-> p1
-        p3 -. "rebase onto PR 2" .-> p2
+        p1 --> x["merge: resolve conflicts"]
+        p2 --> x
+        p3 --> x
     end
     subgraph stacked["Stacked serial subagents"]
         direction TB
